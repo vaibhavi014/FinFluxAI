@@ -1,0 +1,78 @@
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper:2.7.3.Final
+    restart: unless-stopped
+
+  kafka:
+    image: quay.io/debezium/kafka:2.7.3.Final
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    environment:
+      ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_wal_senders=8", "-c", "max_replication_slots=8"]
+    environment:
+      POSTGRES_DB: finflux
+      POSTGRES_USER: finflux
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-finflux}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finflux -d finflux"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  connect:
+    image: quay.io/debezium/connect:2.7.3.Final
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: finflux-connect
+      CONFIG_STORAGE_TOPIC: finflux_connect_configs
+      OFFSET_STORAGE_TOPIC: finflux_connect_offsets
+      STATUS_STORAGE_TOPIC: finflux_connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+    depends_on:
+      - kafka
+      - postgres
+
+  app:
+    build:
+      context: ./services/finflux-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://finflux:${DATABASE_PASSWORD:-finflux}@postgres:5432/finflux
+      DATABASE_USER: finflux
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-finflux}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      STORAGE_PATH: /data/lake
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      START_CDC_CONSUMER: "true"
+    volumes:
+      - lake_data:/data/lake
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  lake_data:

@@ -1,0 +1,12 @@
+stages:
+  - test
+
+unit-tests:
+  stage: test
+  image: python:3.12
+  script:
+    - cd services/finflux-app
+    - pip install -r requirements-dev.txt
+    - pytest -q
+  rules:
+    - if: $CI_PIPELINE_SOURCE

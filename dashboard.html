@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FinFlux</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <header class="top">
+    <div>
+      <p class="eyebrow">FinFlux AI</p>
+      <h1>Transaction risk monitor</h1>
+      <p class="sub">MVC demo: PostgreSQL CDC events scored in near real time.</p>
+    </div>
+    <button id="refresh" type="button">Refresh</button>
+  </header>
+
+  <section class="cards" id="cards">
+    <article><span>Total</span><strong id="total">—</strong></article>
+    <article class="low"><span>Low</span><strong id="low">—</strong></article>
+    <article class="medium"><span>Medium</span><strong id="medium">—</strong></article>
+    <article class="high"><span>High</span><strong id="high">—</strong></article>
+    <article><span>Alerts</span><strong id="alerts-count">—</strong></article>
+    <article><span>DLQ rows</span><strong id="dlq">—</strong></article>
+  </section>
+
+  <main class="grid">
+    <section>
+      <h2>Recent transactions</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody id="txn-body"></tbody>
+        </table>
+      </div>
+    </section>
+    <section>
+      <h2>Alerts</h2>
+      <div id="alerts" class="alerts"></div>
+    </section>
+  </main>
+  <p id="error" class="error" hidden></p>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
