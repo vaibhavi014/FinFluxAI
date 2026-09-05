@@ -1,0 +1,27 @@
+{
+  "name": "finflux-transactions-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "finflux",
+    "database.password": "finflux",
+    "database.dbname": "finflux",
+    "topic.prefix": "finflux",
+    "table.include.list": "public.transactions",
+    "plugin.name": "pgoutput",
+    "slot.name": "finflux_debezium",
+    "publication.name": "finflux_publication",
+    "publication.autocreate.mode": "filtered",
+    "tombstones.on.delete": "false",
+    "decimal.handling.mode": "string",
+    "time.precision.mode": "adaptive",
+    "snapshot.mode": "initial",
+    "slot.drop.on.stop": "false",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "message.key.columns": "public.transactions:transaction_id"
+  }
+}

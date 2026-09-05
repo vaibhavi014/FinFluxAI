@@ -1,2 +1,8 @@
-# FinFluxAI
-FinFlux AI is a real-time financial monitoring system that uses  Change Data Capture  ( CDC ) and Agentic AI to track financial data changes, detect unusual customer behavior, identify suspicious patterns, assess risk, and provide clear, actionable insights for faster decision-making.
+Topics used by the demo:
+
+- `finflux.public.transactions` — Debezium CDC (created by the connector)
+- `transactions.processed` — scored events (3 partitions, RF=1)
+- `transactions.alerts` — non-LOW scores
+- `transactions.dlq` — poison / exhausted retries (1 partition)
+
+Consumer group: `finflux-processor`.
